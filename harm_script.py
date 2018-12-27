@@ -132,7 +132,7 @@ def mkmov_simple(starti=0,endi=400):
     for i in range(starti,endi+1):
         rd("dump%03d" % i);
         aphi=psicalc()
-        if i == starti: amax = aphi.max()
+        if i == starti: amax = np.abs(aphi).max()
         cs, cb = plco(np.log10(rho),levels=np.linspace(-8,0,100),isfilled=1,k=0,xy=1,xmax=10,ymax=5,dobh=1,cb=1,extend="both",pretty=1)
         ax = plt.gca()
         ax.set_xlabel(r"$R\ [r_g]$",fontsize=20,labelpad=-5)
