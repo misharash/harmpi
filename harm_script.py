@@ -129,7 +129,7 @@ def Ebindisco(a):
     return( Eb )
 
 def mkmov_simple(starti=0,endi=400):
-    for i in xrange(starti,endi+1):
+    for i in range(starti,endi+1):
         rd("dump%03d" % i);
         aphi=psicalc()
         if i == starti: amax = aphi.max()
