@@ -17,10 +17,10 @@ mpl.rcParams['font.sans-serif'] = 'cmr10'
 
 #font = { 'size'   : 20}
 #rc('font', **font)
-rc('xtick', labelsize=20) 
-rc('ytick', labelsize=20) 
-#rc('xlabel', **font) 
-#rc('ylabel', **font) 
+rc('xtick', labelsize=20)
+rc('ytick', labelsize=20)
+#rc('xlabel', **font)
+#rc('ylabel', **font)
 
 # legend = {'fontsize': 20}
 # rc('legend',**legend)
@@ -30,7 +30,7 @@ rc('mathtext',fontset='cm')
 #use this, but at the expense of slowdown of rendering
 #rc('text', usetex=True)
 # #add amsmath to the preamble
-#matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amssymb,amsmath}"] 
+#matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amssymb,amsmath}"]
 import pdb
 
 import numpy as np
@@ -85,7 +85,7 @@ def convert_to_single_file(startn=0,endn=-1,ln=10,whichi=0,whichn=1,**kwargs):
             continue
         if not os.path.isfile( fname ):
             rd(fname)
-        
+
 
 def ellk(a,r):
     ekval = ek(a,r)
@@ -120,7 +120,7 @@ def etaNT(a):
 def Ebindisco(a):
     eps = np.finfo(np.float64).eps
     a0 = 0.99999 #1.-1e8*eps
-    if a > a0: 
+    if a > a0:
         a = a0
         Eb = Ebind( Risco(a), a )
         return((a-a0)/(1.-a0)*(1.-3.**(-0.5)) + (1.-a)/(1.-a0)*Eb)
@@ -140,7 +140,7 @@ def mkmov_simple(starti=0,endi=400):
         cb.ax.set_xlabel(r"$\log\rho$",fontsize=20,ha="left")
         plc(aphi,levels=np.linspace(-amax,amax,10)[1:-1],colors="white",linewidths=2,xy=-1)
         print(i);
-        plt.title("t=%.4g"%np.round(t)); 
+        plt.title("t=%.4g"%np.round(t));
         plt.draw();
         plt.savefig("frame%03d.png"%i)
 
@@ -216,7 +216,7 @@ def mkmov(startn=0,endn=-1,ln=10,whichi=0,whichn=1,**kwargs):
         if dosavefig:
             plt.savefig(fname,dpi = dpi)
 
-            
+
 #############
 def mkfrmsimple(fig=None,aphimax=None,lnx=100,lny=100,vmin=-10,vmax=1,fntsize=20,asp=1.):
     if fig is None: fig = plt.gcf();
@@ -239,7 +239,7 @@ def mkfrmsimple(fig=None,aphimax=None,lnx=100,lny=100,vmin=-10,vmax=1,fntsize=20
     plt.xlim(-lnx,lnx)
     plt.ylim(-lny,lny)
     mathify_axes_ticks(ax)
-    
+
 def mkvertcolorbar(ax,fig,vmin=0,vmax=1,label=None,ylabel=None,ticks=None,fntsize=20,cmap=mpl.cm.jet,gap=0.03,width=0.02,extend="neither",loc="right"):
     box = ax.get_position()
     #pdb.set_trace()
@@ -595,7 +595,7 @@ def read_header(dump,issilent=True,returnheaderline=False):
         return headerline
     else:
         return header
-            
+
 def read_body(dump,nx=None,ny=None,nz=None,noround=False):
         fin = open( dump, "rb" )
         header = fin.readline()
@@ -649,7 +649,7 @@ def data_assign(gd,type=None,**kwargs):
     else:
         print("Unknown data type: %s" % type)
         return gd
-    
+
 def gdump_assign(gd,**kwargs):
     global t,nx,ny,nz,N1,N2,N3,_dx1,_dx2,_dx3,a,gam,Rin,Rout,hslope,R0,ti,tj,tk,x1,x2,x3,r,h,ph,gcov,gcon,gdet,drdx,gn3,gv3,guu,gdd,dxdxp, games
     nx = kwargs.pop("nx",nx)
@@ -748,8 +748,8 @@ def fdump_assign(gd,**kwargs):
 def mdot(a,b):
     """
     Computes a contraction of two tensors/vectors.  Assumes
-    the following structure: tensor[m,n,i,j,k] OR vector[m,i,j,k], 
-    where i,j,k are spatial indices and m,n are variable indices. 
+    the following structure: tensor[m,n,i,j,k] OR vector[m,i,j,k],
+    where i,j,k are spatial indices and m,n are variable indices.
     """
     if (a.ndim == 3 and b.ndim == 3) or (a.ndim == 4 and b.ndim == 4):
           c = (a*b).sum(0)
@@ -852,9 +852,9 @@ def plc(myvar,**kwargs): #plc
             xcoord=np.concatenate((-xcoord[:,::-1],xcoord),axis=1)
             ycoord=np.concatenate((ycoord[:,::-1],ycoord),axis=1)
         else:
-            if myvar.shape[-1] > 1: 
-                symmk = (k+nz/2)%nz 
-            else: 
+            if myvar.shape[-1] > 1:
+                symmk = (k+nz/2)%nz
+            else:
                 symmk = k
             myvar=np.concatenate((myvar[:,ny-1:ny,k:k+1],myvar[:,::-1,symmk:symmk+1],myvar[:,:,k:k+1]),axis=1)
             xcoord=np.concatenate((xcoord[:,ny-1:ny,k:k+1],-xcoord[:,::-1],xcoord),axis=1)
@@ -934,7 +934,7 @@ def plc(myvar,**kwargs): #plc
         if pretty:
             for label in cb.ax.get_yticklabels():
                 label.set_fontsize(fntsize)
-    if xy and dobh and "rhor" in globals(): 
+    if xy and dobh and "rhor" in globals():
         el = Ellipse((0,0), 2*rhor, 2*rhor, facecolor='k', alpha=1)
         art=ax.add_artist(el)
         art.set_zorder(20)
@@ -1027,7 +1027,7 @@ def bhole():
 
 
 def testfail(fldname = "dump000"):
-    try: 
+    try:
         rd(fldname)
     except IOError as e:
         print("I/O error({0}): {1}".format(e.errno, e.strerror))
@@ -1042,7 +1042,7 @@ def get_sorted_file_list(prefix="dump"):
     flist2.sort()
     flist = np.concatenate((flist0,flist1,flist2))
     return flist
-    
+
 
 
 def fFdd(i,j):
@@ -1102,8 +1102,8 @@ def amin(arg1,arg2):
 # End of movie making
 #
 #############################
-        
-    
+
+
 if __name__ == "__main__":
     if len(sys.argv)>1:
         if sys.argv[1].startswith("mkfrm"):
