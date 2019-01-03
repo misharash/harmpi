@@ -1,0 +1,5 @@
+*.o
+dumps
+harm
+image_interp
+images
