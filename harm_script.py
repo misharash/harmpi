@@ -947,7 +947,7 @@ def faraday():
     global omegaf1, omegaf2
     if 'omegaf1' in globals():
         del omegaf1
-    if 'omemaf2' in globals():
+    if 'omegaf2' in globals():
         del omegaf2
     omegaf1=fFdd(0,1)/fFdd(1,3)
     omegaf2=fFdd(0,2)/fFdd(2,3)
