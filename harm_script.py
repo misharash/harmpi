@@ -42,6 +42,7 @@ from numpy import ma
 import matplotlib.colors as colors
 #use_math_text = True
 
+dump_dir = "dumps" #can be changed after script execution
 
 def mathify_axes_ticks(ax,fontsize=20,xticks=None,yticks=None):
     if xticks is None:
@@ -62,8 +63,8 @@ def mathify_axes_ticks(ax,fontsize=20,xticks=None,yticks=None):
 def convert_to_single_file(startn=0,endn=-1,ln=10,whichi=0,whichn=1,**kwargs):
     which = kwargs.pop("which","convert_file")
     rg("gdump")
-    flist1 = np.sort(glob.glob( os.path.join("dumps/", "dump[0-9][0-9][0-9]_0000") ) )
-    flist2 = np.sort(glob.glob( os.path.join("dumps/", "dump[0-9][0-9][0-9][0-9]_0000") ) )
+    flist1 = np.sort(glob.glob( os.path.join(dump_dir + "/", "dump[0-9][0-9][0-9]_0000") ) )
+    flist2 = np.sort(glob.glob( os.path.join(dump_dir + "/", "dump[0-9][0-9][0-9][0-9]_0000") ) )
     flist1.sort()
     flist2.sort()
     flist = np.concatenate((flist1,flist2))
@@ -172,14 +173,14 @@ def mkmov(startn=0,endn=-1,ln=10,whichi=0,whichn=1,**kwargs):
     aphi=psicalc()
     aphimax = aphi.max()
     #construct file list
-    flist1 = np.sort(glob.glob( os.path.join("dumps/", "dump[0-9][0-9][0-9]") ) )
-    flist2 = np.sort(glob.glob( os.path.join("dumps/", "dump[0-9][0-9][0-9][0-9]") ) )
+    flist1 = np.sort(glob.glob( os.path.join(dump_dir + "/", "dump[0-9][0-9][0-9]") ) )
+    flist2 = np.sort(glob.glob( os.path.join(dump_dir + "/", "dump[0-9][0-9][0-9][0-9]") ) )
     flist1.sort()
     flist2.sort()
     flist = np.concatenate((flist1,flist2))
     if len(flist) == 0:
-        flist1 = np.sort(glob.glob( os.path.join("dumps/", "dump[0-9][0-9][0-9]_0000") ) )
-        flist2 = np.sort(glob.glob( os.path.join("dumps/", "dump[0-9][0-9][0-9][0-9]_0000") ) )
+        flist1 = np.sort(glob.glob( os.path.join(dump_dir + "/", "dump[0-9][0-9][0-9]_0000") ) )
+        flist2 = np.sort(glob.glob( os.path.join(dump_dir + "/", "dump[0-9][0-9][0-9][0-9]_0000") ) )
         flist1.sort()
         flist2.sort()
         flist = np.concatenate((flist1,flist2))
@@ -366,10 +367,11 @@ def read_file(dump,type=None,savedump=True,saverdump=False,noround=False):
         else:
             print("Couldn't guess dump type; assuming it is a data dump")
             type = "dump"
+    #
     #normal dump
-    if os.path.isfile( "dumps/" + dump ):
-        headerline = read_header("dumps/" + dump, returnheaderline = True)
-        gd = read_body("dumps/" + dump,nx=N1+2*N1G,ny=N2+2*N2G,nz=N3+2*N3G,noround=1)
+    if os.path.isfile( dump_dir + "/" + dump ):
+        headerline = read_header(dump_dir + "/" + dump, returnheaderline = True)
+        gd = read_body(dump_dir + "/" + dump,nx=N1+2*N1G,ny=N2+2*N2G,nz=N3+2*N3G,noround=1)
         if noround:
             res = data_assign(         gd,type=type,nx=N1+2*N1G,ny=N2+2*N2G,nz=N3+2*N3G)
         else:
@@ -377,7 +379,7 @@ def read_file(dump,type=None,savedump=True,saverdump=False,noround=False):
         return res
     #MPI-type dump that is spread over many files
     else:
-        flist = np.sort(glob.glob( "dumps/" + dump + "_[0-9][0-9][0-9][0-9]" ))
+        flist = np.sort(glob.glob( dump_dir + "/" + dump + "_[0-9][0-9][0-9][0-9]" ))
         if len(flist) == 0:
             print( "Could not find %s or its MPI counterpart" % dump )
             return
@@ -416,7 +418,7 @@ def read_file(dump,type=None,savedump=True,saverdump=False,noround=False):
         res = data_assign(fgd,type=type,nx=nx+2*N1G,ny=ny+2*N2G,nz=nz+2*N3G)
         if savedump:
             #if the full dump file does not exist, create it
-            dumpfullname = "dumps/" + dump
+            dumpfullname = dump_dir + "/" + dump
             if (type == "dump" or type == "gdump") and not os.path.isfile(dumpfullname):
                 sys.stdout.write("Saving full dump to %s..." % dumpfullname)
                 sys.stdout.flush()
@@ -1034,9 +1036,9 @@ def testfail(fldname = "dump000"):
 
 
 def get_sorted_file_list(prefix="dump"):
-    flist0 = np.sort(glob.glob( os.path.join("dumps/", "%s[0-9][0-9][0-9]"%prefix) ) )
-    flist1 = np.sort(glob.glob( os.path.join("dumps/", "%s[0-9][0-9][0-9][0-9]"%prefix) ) )
-    flist2 = np.sort(glob.glob( os.path.join("dumps/", "%s[0-9][0-9][0-9][0-9][0-9]"%prefix) ) )
+    flist0 = np.sort(glob.glob( os.path.join(dump_dir + "/", "%s[0-9][0-9][0-9]"%prefix) ) )
+    flist1 = np.sort(glob.glob( os.path.join(dump_dir + "/", "%s[0-9][0-9][0-9][0-9]"%prefix) ) )
+    flist2 = np.sort(glob.glob( os.path.join(dump_dir + "/", "%s[0-9][0-9][0-9][0-9][0-9]"%prefix) ) )
     flist0.sort()
     flist1.sort()
     flist2.sort()
