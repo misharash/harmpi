@@ -868,7 +868,7 @@ void init_monopole(double Rout_val)
 	gam = 4./3. ;
 
 	/* disk parameters (use fishbone.m to select new solutions) */
-        a = 0.9375 ;
+        a = 0.1 ;
         rin = 6. ;
         rmax = 12. ;
         l = lfish_calc(rmax) ;
