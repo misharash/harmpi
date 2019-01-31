@@ -932,7 +932,7 @@ void init_monopole(double Rout_val)
 
 	/* disk parameters */
 	double disk_half_width = 1.5 * M_PI / N2;
-	double disk_multiplier = 1e3;
+	double disk_multiplier = 1e6;
 
 	ZSLOOP(0,N1-1,0,N2-1,0,N3-1) {
 	  coord(i,j,k,CENT,X) ;
