@@ -41,7 +41,7 @@ To run problems with HARMPI and to analyze the results, please follow this [tuto
 	Set `WHICHPROBLEM` to `MONOPOLE_PROBLEM_2D` in [decs.h](decs.h).  Note: a good total resolution is 1152x256x1. It will take some time for the problem to complete depending on the number of cores used.
 
     * Compare $\Gamma(r)$ to that in the above 1D monopole problem. In which case is the Lorentz factor higher? Why?
-    * Verify that the value of the Lorentz factor at the fast surface is $\Gamma =$ `(bsq/rho)**0.5`. What is the value of $\Gamma$ at the fast surface?
+    * Verify that the value of the Lorentz factor at the fast surface is $\Gamma =$ `(bsq/rho)**0.5`.
 
 * Torus problem
 
