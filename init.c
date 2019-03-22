@@ -100,6 +100,7 @@ void init()
   switch( WHICHPROBLEM ) {
   case MONOPOLE_PROBLEM_1D:
   case MONOPOLE_PROBLEM_2D:
+  case NSSURFACE:
     init_monopole(1e3);
     break;
   case BZ_MONOPOLE_2D:

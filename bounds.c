@@ -94,6 +94,9 @@ void bound_x1dn(double prim[][N2M][N3M][NPR] )
         PLOOP prim[iNg][j][k][m] = prim[0][j][k][m];
         pflag[iNg][j][k] = pflag[0][j][k] ;
 #endif
+#if (WHICHPROBLEM == NSSURFACE)
+        bound_x1dn_nssurface(prim, iNg, j, k);
+#endif
       }
       
 #if( RESCALE )
@@ -748,4 +751,183 @@ void inflow_check(double *pr, int ii, int jj, int kk, int type )
 	    return ;
 
 }
+
+//functions that are specific for NS boundary
+#if(WHICHPROBLEM == NSSURFACE)
+
+//puts analytical EMFs on inner r boundary
+void adjust_emfs_nssurface(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR], double F3[][N2M][N3M][NPR])
+{
+  double E2;
+  double X[NDIM];
+  double r, th1, th2, phi;
+  if (is_physical_bc(1, 0)) {
+    int i=0;
+    for (int j=0; j < N2+D2; ++j)
+      for (int k=0; k < N3+D3; ++k) {
+        F1[i][j][k][B1] = F2[i][j][k][B2] = F3[i][j][k][B3] = 0; //always zeros
+        F2[i][j][k][B1] = F1[i][j][k][B2] = 0; //zeros since we rotate around polar axis
+        //calculate the only nonzero component E^2
+        coord(i, j, k, CORN, X);
+        bl_coord(X, &r, &th1, &phi);
+        coord(i, j+1, k, CORN, X);
+        bl_coord(X, &r, &th2, &phi);
+        E2 = OMEGA * (cos(th2)-cos(th1)) / dx[2];
+        F1[i][j][k][B2] = E2;
+        F2[i][j][k][B1] = -E2;
+      }
+  }
+}
+
+//calculate velocity parallel to magnetic field
+void compute_vpar(double pr[], struct of_geom *geom, double *vpar) {
+  double Bccov[NDIM], Bccon[NDIM], vcon[NDIM], ucon[NDIM];
+  double Bsq, absB, Bdotv;
+  int j;
+  Bccon[0] = 0;
+  Bccon[1] = pr[B1];
+  Bccon[2] = pr[B2];
+  Bccon[3] = pr[B3];
+  lower(Bccon, geom, Bccov);
+  //get relative velocity
+  ucon_calc(pr, geom, ucon);
+  //get 3-velocity
+  DLOOPA vcon[j] = ucon[j]/ucon[TT];
+  //B^2 and |B|
+  Bsq = SMALL;
+  SLOOPA Bsq += Bccon[j] * Bccov[j];
+  absB = sqrt(Bsq);
+  //B_mu v^mu
+  Bdotv = 0;
+  SLOOPA Bdotv += Bccov[j] * ucon[j];
+  //vpar
+  *vpar = Bdotv/absB;
+  if (Bccon[1]<0) *vpar *= -1; //positive direction is away from the star
+}
+
+//change velocity parallel to magnetic field saving perpendicular component
+void set_vpar(double vpar, double gamma_max, struct of_geom *geom, double pr[]) {
+  double Bccov[NDIM], Bccon[NPR];
+  double vcon[NDIM], ucon[NDIM];
+  double Bdotv;
+  double vpar_old_vec[NDIM], vperp_old_vec[NDIM];
+  double vpar_old;
+  double Bsq;
+  double absB;
+  int j;
+  double gamma_perp;
+  double vperp_sq, vmax_sq;
+  //magnetic field stuff
+  Bccon[0] = 0;
+  Bccon[1] = pr[B1];
+  Bccon[2] = pr[B2];
+  Bccon[3] = pr[B3];
+  lower(Bccon, geom, Bccov);
+  Bsq = SMALL;
+  SLOOPA Bsq += Bccon[j] * Bccov[j];
+  absB = sqrt(Bsq);
+  //get 4-velocity
+  ucon_calc(pr, geom, ucon);
+  //get 3-velocity
+  DLOOPA vcon[j] = ucon[j]/ucon[TT];
+  //B_mu v^mu
+  Bdotv = 0;
+  SLOOPA Bdotv += Bccov[j] * ucon[j];
+  //old velocity components
+  vpar_old = Bdotv/absB;
+  SLOOPA vpar_old_vec[j]  = vpar_old * Bccon[j] / absB;
+  SLOOPA vperp_old_vec[j] = vcon[j] - vpar_old_vec[j];
+  //gamma factor
+  ut_calc_3vel(vperp_old_vec, geom, &gamma_perp);
+  //squares of velocity components
+  vperp_sq = 1.-1./(gamma_perp*gamma_perp);
+  vmax_sq = 1.-1./(gamma_max*gamma_max);
+  //check if gamma won't become too large
+  if (vmax_sq <= vperp_sq) {
+    vpar = 0;
+  }
+  else if (vperp_sq + vpar*vpar > vmax_sq) {
+    vpar = sqrt(vmax_sq - vperp_sq) * copysign(1., vpar);
+  }
+  //set new 3-velocity
+  SLOOPA vcon[j] = vperp_old_vec[j] + vpar * Bccon[j] / absB;
+  //convert it to 4-velocity and put into prims
+  ut_calc_3vel(vcon, geom, &ucon[TT]);
+  SLOOPA ucon[j] = vcon[j]*ucon[TT];
+  pr[U1] = ucon[1];
+  pr[U2] = ucon[2];
+  pr[U3] = ucon[3];
+}
+
+//set density and velocity in one cell
+void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, struct of_geom *ptrgeom, struct of_geom *ptrrgeom)
+{
+  double rgamma, gammamax;
+  double vpar, vpar_have;
+  double X[NDIM], V[NDIM], rV[NDIM];
+  coord(i, j, k, dirprim, X);
+  bl_coord_vec(X, V);
+  coord(i, j, k, CENT, X);
+  bl_coord_vec(X, rV);
+  gamma_calc(rprim, ptrrgeom, &rgamma);
+  compute_vpar(rprim, ptrrgeom, &vpar_have);
+  int set_bc = rprim[U1]>0; //set BCs only if flowing out
+  if (set_bc) {
+    vpar = VPARWANT;
+    gammamax = GAMMAMAX;
+  }
+  else {
+    vpar = vpar_have;
+    gammamax = rgamma;
+  }
+  set_vpar(vpar, gammamax, ptrgeom, pr);
+  if (set_bc) {
+    double bsq = bsq_calc(pr, ptrgeom);
+    pr[RHO] = bsq/BSQORHOBND*pow(rV[1]/V[1],4.);
+    pr[UU]  = bsq/BSQOUBND*pow(rV[1]/V[1],4.*gam);
+  }
+  else {
+    pr[RHO] = rprim[RHO]*pow(rV[1]/V[1],4.);
+    pr[UU]  = rprim[UU]*pow(rV[1]/V[1],4.*gam);
+  }
+}
+
+//set hydrodynamic primitive variables on inner r boundary
+//for one cell face, we are on physical boundary and i=0
+void set_hydro_nssurface(double pr[][N2M][N3M][NPR], double p_l[], double p_r[], int i, int j, int k, struct of_geom *geomface)
+{
+  int m;
+  double prface[NPR];
+  struct of_geom geomcent;
+  get_geometry(i, j, k, CENT, &geomcent); //not sure if needed
+  PLOOP prface[m] = (p_l[m] + p_r[m])/2;
+  set_den_vel(prface, pr[i][j][k], FACE1, i, j, k, geomface, &geomcent);
+  PLOOP p_l[m] = p_r[m] = prface[m];
+}
+
+//set neutron star boundary condition after outflow is done
+void bound_x1dn_nssurface(double prim[][N2M][N3M][NPR], int i, int j, int k) {
+  double X[NPR], V[NPR], rV[NPR];
+  double dxdp[NDIM][NDIM], rdxdp[NDIM][NDIM];
+  double Bur, rBur;
+  struct of_geom geom;
+  //for reference physical cell
+  coord(0, j, k, CENT, X);
+  bl_coord_vec(X, rV);
+  dxdxp_func(X, rdxdp);
+  //get radial magnetic field
+  rBur = prim[0][j][k][B1] * rdxdp[1][1];
+  //for our cell
+  coord(i, j, k, CENT, X);
+  bl_coord_vec(X, V);
+  dxdxp_func(X, dxdp);
+  //set radial magnetic field
+  Bur = rBur * rV[1]*rV[1]/V[1]/V[1];
+  prim[i][j][k][B1] = Bur / dxdp[1][1];
+  //set other parameters
+  get_geometry(i, j, k, CENT, &geom);
+  set_den_vel(prim[i][j][k], prim[i][j][k], CENT, i, j, k, &geom, &geom);
+}
+
+#endif
 

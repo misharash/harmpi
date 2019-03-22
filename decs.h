@@ -78,8 +78,9 @@
 #define BONDI_PROBLEM_2D 6
 #define SNDWAVE_TEST 7
 #define ENTWAVE_TEST 8
+#define NSSURFACE 9
 
-#define WHICHPROBLEM BZ_MONOPOLE_2D
+#define WHICHPROBLEM NSSURFACE
 #define DOKTOT   1
 #define DOCYLINDRIFYCOORDS 0
 
@@ -157,6 +158,15 @@
 #define INFLOW   (1)          /* whether or not to allow inflow at boundaries */
 #define PERIODIC (1)          /* whether or not to use periodic boundary conditions */
 #define OUTFLOW  (0)          /* whether or not to use outflow boundary conditions in all directions */
+#elif WHICHPROBLEM == NSSURFACE
+#define N1       (128)        /* number of physical zones in X1-direction */
+#define N2       (128)        /* number of physical zones in X2-direction */
+#define N3       (1)          /* number of physical zones in X3-direction */
+#define GR       (0)          /* whether or not to use GR */
+#define BL       (1)          /* whether or not to use BL coords */
+#define INFLOW   (0)          /* whether or not to allow inflow at boundaries */
+#define PERIODIC (0)          /* whether or not to use periodic boundary conditions */
+#define OUTFLOW  (0)          /* whether or not to use outflow boundary conditions in all directions */
 #endif
 
 
@@ -207,6 +217,13 @@
 #define BSQORHOMAX (50.*FLOORFACTOR)
 #define BSQOUMAX (2500.*FLOORFACTOR)
 #define UORHOMAX (50.*FLOORFACTOR)
+
+#if(WHICHPROBLEM == NSSURFACE)
+#define OMEGA (0.25) //neutron star surface rotation speed
+#define VPARWANT (0.5) //parallel velocity component set on boundary
+#define BSQORHOBND BSQORHOMAX
+#define BSQOUBND BSQORHOMAX //like in init_monopole
+#endif
 
 //add mass in the drift frame (=1) instead of fluid frame (=0)
 #define DRIFT_FLOOR (1)
@@ -657,6 +674,12 @@ void reconstruct_lr_weno(double ptmp[NMAX+2*NG][NPR], int N,
 int mpi_init(int argc,char *argv[]);
 
 int is_physical_bc( int dim, int isup );
+
+#if (WHICHPROBLEM == NSSURFACE)
+void adjust_emfs_nssurface(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR], double F3[][N2M][N3M][NPR]);
+void set_hydro_nssurface(double pr[][N2M][N3M][NPR], double p_l[], double p_r[], int i, int j, int k, struct of_geom *geomface);
+void bound_x1dn_nssurface(double prim[][N2M][N3M][NPR], int i, int j, int k);
+#endif
 
 void initialize_parallel_write(int stage);
 void de_initialize_parallel_write();

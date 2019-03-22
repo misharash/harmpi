@@ -413,6 +413,11 @@ double fluxcalc(
       
       get_geometry(i,j,k,face,&geom) ;
       
+#if(WHICHPROBLEM == NSSURFACE)
+      if ((dir == 1) && (i == 0) && is_physical_bc(1,0))
+        set_hydro_nssurface(pr, p_l, p_r, i, j, k, &geom);
+#endif
+      
 #if(RESCALE)
       rescale(p_l,REVERSE,dir,i,j,k,face,&geom) ;
       rescale(p_r,REVERSE,dir,i,j,k,face,&geom) ;
@@ -551,4 +556,8 @@ void flux_ct(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR], double F3[]
     F3[i][j][k][B3] = 0. ;
 #endif
   }
+  /* adjust EMFs if needed */
+#if (WHICHPROBLEM == NSSURFACE)
+  adjust_emfs_nssurface(F1, F2, F3);
+#endif
 }
