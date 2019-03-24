@@ -773,8 +773,8 @@ void adjust_emfs_nssurface(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR
         coord(i, j+1, k, CORN, X);
         bl_coord(X, &r, &th2, &phi);
         E2 = OMEGA * (cos(th2)-cos(th1)) / dx[2];
-        F1[i][j][k][B2] = E2;
-        F2[i][j][k][B1] = -E2;
+        F1[i][j][k][B3] = E2;
+        F3[i][j][k][B1] = -E2;
       }
   }
 }

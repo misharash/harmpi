@@ -219,7 +219,7 @@
 #define UORHOMAX (50.*FLOORFACTOR)
 
 #if(WHICHPROBLEM == NSSURFACE)
-#define OMEGA (0.25) //neutron star surface rotation speed
+#define OMEGA (0.5) //neutron star surface rotation speed
 #define VPARWANT (0.5) //parallel velocity component set on boundary
 #define BSQORHOBND BSQORHOMAX
 #define BSQOUBND BSQORHOMAX //like in init_monopole
