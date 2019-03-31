@@ -887,6 +887,11 @@ void init_monopole(double Rout_val)
         Rin = 0.7*rhor ;
         Rout = Rout_val ;
         rbr = Rout*10.;
+  //this override is temporary, should create another init
+  if (WHICHPROBLEM == NSSURFACE) {
+    R0 = 0;
+    Rin = 1;
+  }
     npow2=4.0; //power exponent
     cpow2=1.0; //exponent prefactor (the larger it is, the more hyperexponentiation is)
 
