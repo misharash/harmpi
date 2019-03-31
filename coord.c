@@ -198,6 +198,14 @@ void gcov_func(double *X, double gcovp[][NDIM])
       }
     }
   }
+  else if(BL==1) {
+    gcov[TT][TT] = -1. ;
+    gcov[1][1] = 1. ;
+    gcov[2][2] = r*r;
+    gcov[3][3] = r*r*s2;
+    DLOOP gcovp[j][k] = 0;
+    DLOOPA gcovp[j][j] = gcov[j][j]*dxdxp[j][j]*dxdxp[j][j]; //enough in this case
+  }
   else {
     gcovp[TT][TT] = -1. ;
     gcovp[1][1] = 1. ;
