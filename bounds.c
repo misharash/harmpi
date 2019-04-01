@@ -108,7 +108,6 @@ void bound_x1dn(double prim[][N2M][N3M][NPR] )
 #endif
     }
   }
-#endif
 
   /* make sure there is no inflow at the inner boundary */
   if(1!=INFLOW) {
@@ -118,6 +117,7 @@ void bound_x1dn(double prim[][N2M][N3M][NPR] )
       inflow_check(prim[i][j][k],i,j,k,0) ; //0 stands for -x1 boundary
     }
   }
+#endif
 #endif
   
 }
