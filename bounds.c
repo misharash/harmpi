@@ -860,14 +860,14 @@ void set_vpar(double vpar, double gamma_max, struct of_geom *geom, double pr[]) 
 }
 
 //set density and velocity in one cell
-void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, struct of_geom *ptrgeom, struct of_geom *ptrrgeom)
+void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, int ri, int rj, int rk, struct of_geom *ptrgeom, struct of_geom *ptrrgeom)
 {
   double rgamma, gammamax;
   double vpar, vpar_have;
   double X[NDIM], V[NDIM], rV[NDIM];
   coord(i, j, k, dirprim, X);
   bl_coord_vec(X, V);
-  coord(i, j, k, CENT, X);
+  coord(ri, rj, rk, CENT, X);
   bl_coord_vec(X, rV);
   gamma_calc(rprim, ptrrgeom, &rgamma);
   compute_vpar(rprim, ptrrgeom, &vpar_have);
@@ -894,14 +894,14 @@ void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, 
 
 //set hydrodynamic primitive variables on inner r boundary
 //for one cell face, we are on physical boundary and i=0
-void set_hydro_nssurface(double pr[][N2M][N3M][NPR], double p_l[], double p_r[], int i, int j, int k, struct of_geom *geomface)
+void set_hydro_nssurface(double pr[][N2M][N3M][NPR], double p_l[], double p_r[], int i, int j, int k, struct of_geom *geom)
 {
   int m;
   double prface[NPR];
-  struct of_geom geomcent;
-  get_geometry(i, j, k, CENT, &geomcent); //not sure if needed
+  struct of_geom rgeom;
+  get_geometry(i, j, k, CENT, &rgeom); //reference geometry
   PLOOP prface[m] = (p_l[m] + p_r[m])/2;
-  set_den_vel(prface, pr[i][j][k], FACE1, i, j, k, geomface, &geomcent);
+  set_den_vel(prface, pr[i][j][k], FACE1, i, j, k, i, j, k, geom, &rgeom);
   PLOOP p_l[m] = p_r[m] = prface[m];
 }
 
@@ -910,11 +910,12 @@ void bound_x1dn_nssurface(double prim[][N2M][N3M][NPR], int i, int j, int k) {
   double X[NPR], V[NPR], rV[NPR];
   double dxdp[NDIM][NDIM], rdxdp[NDIM][NDIM];
   double Bur, rBur;
-  struct of_geom geom;
+  struct of_geom geom, rgeom;
   //for reference physical cell
   coord(0, j, k, CENT, X);
   bl_coord_vec(X, rV);
   dxdxp_func(X, rdxdp);
+  get_geometry(0, j, k, CENT, &rgeom);
   //get radial magnetic field
   rBur = prim[0][j][k][B1] * rdxdp[1][1];
   //for our cell
@@ -926,7 +927,7 @@ void bound_x1dn_nssurface(double prim[][N2M][N3M][NPR], int i, int j, int k) {
   prim[i][j][k][B1] = Bur / dxdp[1][1];
   //set other parameters
   get_geometry(i, j, k, CENT, &geom);
-  set_den_vel(prim[i][j][k], prim[i][j][k], CENT, i, j, k, &geom, &geom);
+  set_den_vel(prim[i][j][k], prim[0][j][k], CENT, i, j, k, 0, j, k, &geom, &rgeom);
 }
 
 #endif
