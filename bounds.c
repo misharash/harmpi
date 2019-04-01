@@ -71,6 +71,9 @@ void bound_x1dn(double prim[][N2M][N3M][NPR] )
   
 #if(N1!=1)
   if (!is_physical_bc(1, 0)) return;
+#if (WHICHPROBLEM == NSSURFACE)
+  bound_x1dn_nssurface(prim);
+#else
 
   /* inner r boundary condition */
   for(j=0;j<N2;j++)
@@ -94,9 +97,6 @@ void bound_x1dn(double prim[][N2M][N3M][NPR] )
         PLOOP prim[iNg][j][k][m] = prim[0][j][k][m];
         pflag[iNg][j][k] = pflag[0][j][k] ;
 #endif
-#if (WHICHPROBLEM == NSSURFACE)
-        bound_x1dn_nssurface(prim, iNg, j, k);
-#endif
       }
       
 #if( RESCALE )
@@ -108,6 +108,7 @@ void bound_x1dn(double prim[][N2M][N3M][NPR] )
 #endif
     }
   }
+#endif
 
   /* make sure there is no inflow at the inner boundary */
   if(1!=INFLOW) {
@@ -905,29 +906,62 @@ void set_hydro_nssurface(double pr[][N2M][N3M][NPR], double p_l[], double p_r[],
   PLOOP p_l[m] = p_r[m] = prface[m];
 }
 
-//set neutron star boundary condition after outflow is done
-void bound_x1dn_nssurface(double prim[][N2M][N3M][NPR], int i, int j, int k) {
+//set neutron star boundary condition in ghost cells
+void bound_x1dn_nssurface(double prim[][N2M][N3M][NPR]) {
   double X[NPR], V[NPR], rV[NPR];
   double dxdp[NDIM][NDIM], rdxdp[NDIM][NDIM];
-  double Bur, rBur;
+  double Bur, Bth, Bph, rBur, rBth, rBph;
   struct of_geom geom, rgeom;
-  //for reference physical cell
-  coord(0, j, k, CENT, X);
-  bl_coord_vec(X, rV);
-  dxdxp_func(X, rdxdp);
-  get_geometry(0, j, k, CENT, &rgeom);
-  //get radial magnetic field
-  rBur = prim[0][j][k][B1] * rdxdp[1][1];
-  //for our cell
-  coord(i, j, k, CENT, X);
-  bl_coord_vec(X, V);
-  dxdxp_func(X, dxdp);
-  //set radial magnetic field
-  Bur = rBur * rV[1]*rV[1]/V[1]/V[1];
-  prim[i][j][k][B1] = Bur / dxdp[1][1];
-  //set other parameters
-  get_geometry(i, j, k, CENT, &geom);
-  set_den_vel(prim[i][j][k], prim[0][j][k], CENT, i, j, k, 0, j, k, &geom, &rgeom);
+  int iNg, j, k;
+  for(j=0;j<N2;j++) {
+    for(k=0; k<N3;k++) {
+#if( RESCALE )
+      get_geometry(0,j,k,CENT,&geom) ;
+      rescale(prim[0][j][k],FORWARD, 1, 0,j,k,CENT,&geom) ;
+#endif
+      //for reference physical cell
+      coord(0, j, k, CENT, X);
+      bl_coord_vec(X, rV);
+      dxdxp_func(X, rdxdp);
+      get_geometry(0, j, k, CENT, &rgeom);
+      //get magnetic field
+      rBur = prim[0][j][k][B1] * rdxdp[1][1];
+      rBth = prim[0][j][k][B2] * rdxdp[2][2];
+      rBph = prim[0][j][k][B3] * rdxdp[3][3];
+      
+      for (iNg=-N1G; iNg<0; iNg++) {
+        //for our cell
+        coord(iNg, j, k, CENT, X);
+        bl_coord_vec(X, V);
+        dxdxp_func(X, dxdp);
+        //set radial magnetic field
+        Bur = rBur * rV[1]*rV[1]/V[1]/V[1];
+        prim[iNg][j][k][B1] = Bur / dxdp[1][1];
+        //set other magnetic field components
+        Bth = rBth * rV[1]/V[1];
+        prim[iNg][j][k][B2] = Bth / dxdp[2][2];
+        Bph = rBph * rV[1]/V[1];
+        prim[iNg][j][k][B3] = Bph / dxdp[3][3];
+        //copy other primitives
+        prim[iNg][j][k][RHO] = prim[0][j][k][RHO];
+        prim[iNg][j][k][UU] = prim[0][j][k][UU];
+        prim[iNg][j][k][U1] = prim[0][j][k][U1];
+        prim[iNg][j][k][U2] = prim[0][j][k][U2];
+        prim[iNg][j][k][U3] = prim[0][j][k][U3];
+        prim[iNg][j][k][KTOT] = prim[0][j][k][KTOT]; //not sure if needed
+        //fix density and velocity
+        get_geometry(iNg, j, k, CENT, &geom);
+        set_den_vel(prim[iNg][j][k], prim[0][j][k], CENT, iNg, j, k, 0, j, k, &geom, &rgeom);
+      }
+#if( RESCALE )
+      for (iNg = -N1G; iNg<=0; iNg++)
+      {
+        get_geometry(iNg,j,k,CENT,&geom) ;
+        rescale(prim[iNg][j][k],REVERSE, 1, iNg,j,k,CENT,&geom) ;
+      }
+#endif
+    }
+  }
 }
 
 #endif
