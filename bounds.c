@@ -766,9 +766,8 @@ void adjust_emfs_nssurface(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR
     int i=0;
     for (int j=0; j < N2+D2; ++j)
       for (int k=0; k < N3+D3; ++k) {
-        //F1[i][j][k][B1] = F2[i][j][k][B2] = F3[i][j][k][B3] = 0; //always zeros
-        //F2[i][j][k][B1] = 0;
-        F1[i][j][k][B2] = 0; //zero since we rotate around polar axis
+        F1[i][j][k][B1] = F2[i][j][k][B2] = F3[i][j][k][B3] = 0; //always zeros
+        F2[i][j][k][B1] = F1[i][j][k][B2] = 0; //zeros since we rotate around polar axis
         //calculate the only nonzero component E^2
         coord(i, j, k, CORN, X);
         bl_coord(X, &r, &th1, &phi);
@@ -776,7 +775,7 @@ void adjust_emfs_nssurface(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR
         bl_coord(X, &r, &th2, &phi);
         E2 = OMEGA * (cos(th2)-cos(th1)) / dx[2];
         F1[i][j][k][B3] = E2;
-        //F3[i][j][k][B1] = -E2;
+        F3[i][j][k][B1] = -E2;
       }
   }
 }
