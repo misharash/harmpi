@@ -517,6 +517,10 @@ void flux_ct(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR], double F3[]
                            ) ;
 #endif
   }
+  /* adjust EMFs if needed */
+#if (WHICHPROBLEM == NSSURFACE)
+  adjust_emfs_nssurface(emf);
+#endif
   /* rewrite EMFs as fluxes, after Toth */
 #pragma omp parallel for schedule(static,(N1+D1)*N2*N3/nthreads) collapse(3) default(none) shared(emf,F1,F2,F3,nthreads) private(i,j,k)
   ZSLOOP(0,N1-1+D1,0,N2-1,0,N3-1) {
@@ -556,8 +560,4 @@ void flux_ct(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR], double F3[]
     F3[i][j][k][B3] = 0. ;
 #endif
   }
-  /* adjust EMFs if needed */
-#if (WHICHPROBLEM == NSSURFACE)
-  adjust_emfs_nssurface(F1, F2, F3);
-#endif
 }

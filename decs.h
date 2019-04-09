@@ -676,7 +676,7 @@ int mpi_init(int argc,char *argv[]);
 int is_physical_bc( int dim, int isup );
 
 #if (WHICHPROBLEM == NSSURFACE)
-void adjust_emfs_nssurface(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR], double F3[][N2M][N3M][NPR]);
+void adjust_emfs_nssurface(double emf[][N1+D1][N2+D2][N3+D3]);
 void set_hydro_nssurface(double pr[][N2M][N3M][NPR], double p_l[], double p_r[], int i, int j, int k, struct of_geom *geomface);
 void bound_x1dn_nssurface(double prim[][N2M][N3M][NPR]);
 #endif
