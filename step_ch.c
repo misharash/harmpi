@@ -519,13 +519,15 @@ void flux_ct(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR], double F3[]
   }
   /* adjust EMFs if needed */
 #if (WHICHPROBLEM == NSSURFACE)
-  adjust_emfs_nssurface(emf);
+  if (is_physical_bc(1, 0)) {
+    adjust_emfs_nssurface(emf);
 #if (!DOE2)
   /* still set boundary F1[B3], F3[B1] is presumably not needed */
-  ZSLOOP(0,0,0,N2-1,0,N3-1) {
-    F1[i][j][k][B3] = -emf[2][i][j][k];
-  }
+    ZSLOOP(0,0,0,N2-1+D2,0,N3-1+D3) {
+      F1[i][j][k][B3] = -emf[2][i][j][k];
+    }
 #endif
+  }
 #endif
   /* rewrite EMFs as fluxes, after Toth */
 #pragma omp parallel for schedule(static,(N1+D1)*N2*N3/nthreads) collapse(3) default(none) shared(emf,F1,F2,F3,nthreads) private(i,j,k)
