@@ -856,19 +856,43 @@ void set_vpar(double vpar, double gamma_max, struct of_geom *geom, double pr[]) 
   pr[U3] = ucon[3];
 }
 
+//set the velocity in primitives to be purely rotational
+void set_omega_stataxi(struct of_geom *geom, double omegaf, double *X, double *pr) {
+  double vcon[NDIM], vconp[NDIM], ucon[NDIM];
+  double dxdxp[NDIM][NDIM], dxpdx[NDIM][NDIM];
+  int j, k;
+  //set the 3-velocity in spherical coordinates
+  vcon[1] = vcon[2] = 0;
+  vcon[3] = omegaf;
+  //get jacobian from BL to code coordinates
+  dxdxp_func(X, dxdxp);
+  invert_matrix(dxdxp, dxpdx);
+  //convert 3-velocity to code coordinates
+  for (j=1; j<NDIM; ++j) {
+    vconp[j] = 0;
+    for (k=1; k<NDIM; ++k) vconp[j] += dxpdx[j][k] * vcon[k];
+  }
+  //convert it to 4-velocity and put into prims
+  ut_calc_3vel(vcon, geom, &ucon[TT]);
+  SLOOPA ucon[j] = vcon[j]*ucon[TT];
+  pr[U1] = ucon[1];
+  pr[U2] = ucon[2];
+  pr[U3] = ucon[3];
+}
+
 //set density and velocity in one cell
 void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, int ri, int rj, int rk, struct of_geom *ptrgeom, struct of_geom *ptrrgeom)
 {
   double rgamma, gammamax;
   double vpar, vpar_have;
-  double X[NDIM], V[NDIM], rV[NDIM];
+  double X[NDIM], rX[NDIM], V[NDIM], rV[NDIM];
   coord(i, j, k, dirprim, X);
   bl_coord_vec(X, V);
-  coord(ri, rj, rk, CENT, X);
-  bl_coord_vec(X, rV);
+  coord(ri, rj, rk, CENT, rX);
+  bl_coord_vec(rX, rV);
   gamma_calc(rprim, ptrrgeom, &rgamma);
   compute_vpar(rprim, ptrrgeom, &vpar_have);
-  int set_bc = rprim[U1]>0; //set BCs only if flowing out
+  int set_bc = rprim[U1]>0; //force velocity to what we want only if flowing out
   if (set_bc) {
     vpar = VPARWANT;
     gammamax = GAMMAMAX;
@@ -877,7 +901,8 @@ void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, 
     vpar = vpar_have;
     gammamax = rgamma;
   }
-  set_vpar(vpar, gammamax, ptrgeom, pr);
+  set_omega_stataxi(ptrgeom, OMEGA, X, pr); //set the velocity to be purely rotational
+  set_vpar(vpar, gammamax, ptrgeom, pr); //adjust component parallel to magnetic field
   if (set_bc) {
     double bsq = bsq_calc(pr, ptrgeom);
     pr[RHO] = bsq/BSQORHOBND*pow(rV[1]/V[1],4.);
