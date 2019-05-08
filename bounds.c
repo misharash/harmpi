@@ -868,13 +868,11 @@ void set_omega_stataxi(struct of_geom *geom, double omegaf, double *X, double *p
   dxdxp_func(X, dxdxp);
   invert_matrix(dxdxp, dxpdx);
   //convert 3-velocity to code coordinates
-  for (j=1; j<NDIM; ++j) {
-    vconp[j] = 0;
-    for (k=1; k<NDIM; ++k) vconp[j] += dxpdx[j][k] * vcon[k];
-  }
+  SLOOPA vconp[j] = 0;
+  SLOOP vconp[j] += dxpdx[j][k] * vcon[k];
   //convert it to 4-velocity and put into prims
-  ut_calc_3vel(vcon, geom, &ucon[TT]);
-  SLOOPA ucon[j] = vcon[j]*ucon[TT];
+  ut_calc_3vel(vconp, geom, &ucon[TT]);
+  SLOOPA ucon[j] = vconp[j]*ucon[TT];
   pr[U1] = ucon[1];
   pr[U2] = ucon[2];
   pr[U3] = ucon[3];
