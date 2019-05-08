@@ -760,17 +760,23 @@ void inflow_check(double *pr, int ii, int jj, int kk, int type )
 //boundary check performed before call
 void adjust_emfs_nssurface(double emf[][N1+D1][N2+D2][N3+D3])
 {
+#define DOE2 (N1>1 && N3>1)
+#define DOE3 (N1>1 && N2>1)
+#if (DOE2)
   double X[NDIM];
   double r, th1, th2, phi;
+#endif
   int i, j, k;
   //loop on boundary
   ZSLOOP(0,0,0,N2-1+D2,0,N3-1+D3) {
+#if (DOE2)
     //calculate the only nonzero component E^2
     coord(i, j, k, CORN, X);
     bl_coord(X, &r, &th1, &phi);
     coord(i, j+1, k, CORN, X);
     bl_coord(X, &r, &th2, &phi);
     emf[2][i][j][k] = OMEGA * (cos(th2)-cos(th1)) / dx[2];
+#endif
     //E^3 is zero since we rotate around z-axis
     emf[3][i][j][k] = 0;
   }
