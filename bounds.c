@@ -757,6 +757,7 @@ void inflow_check(double *pr, int ii, int jj, int kk, int type )
 #if(WHICHPROBLEM == NSSURFACE)
 
 //puts analytical EMFs on inner r boundary
+//boundary check performed before call
 void adjust_emfs_nssurface(double emf[][N1+D1][N2+D2][N3+D3])
 {
 #define DOE2 (N1>1 && N3>1)
@@ -765,23 +766,19 @@ void adjust_emfs_nssurface(double emf[][N1+D1][N2+D2][N3+D3])
   double X[NDIM];
   double r, th1, th2, phi;
 #endif
-  if (is_physical_bc(1, 0)) {
-    int i=0;
-    for (int j=0; j < N2+D2; ++j)
-      for (int k=0; k < N3+D3; ++k) {
+  int i, j, k;
+  //loop on boundary
+  ZSLOOP(0,0,0,N2-1+D2,0,N3-1+D3) {
 #if (DOE2)
-        //calculate the only nonzero component E^2
-        coord(i, j, k, CORN, X);
-        bl_coord(X, &r, &th1, &phi);
-        coord(i, j+1, k, CORN, X);
-        bl_coord(X, &r, &th2, &phi);
-        emf[2][i][j][k] = OMEGA * (cos(th2)-cos(th1)) / dx[2];
+    //calculate the only nonzero component E^2
+    coord(i, j, k, CORN, X);
+    bl_coord(X, &r, &th1, &phi);
+    coord(i, j+1, k, CORN, X);
+    bl_coord(X, &r, &th2, &phi);
+    emf[2][i][j][k] = -OMEGA * (cos(th2)-cos(th1)) / dx[2];
 #endif
-#if (DOE3)
-        //E^3 is zero since we rotate around z-axis
-        emf[3][i][j][k] = 0;
-#endif
-      }
+    //E^3 is zero since we rotate around z-axis
+    emf[3][i][j][k] = 0;
   }
 }
 
@@ -865,19 +862,41 @@ void set_vpar(double vpar, double gamma_max, struct of_geom *geom, double pr[]) 
   pr[U3] = ucon[3];
 }
 
+//set the velocity in primitives to be purely rotational
+void set_omega_stataxi(struct of_geom *geom, double omegaf, double *X, double *pr) {
+  double vcon[NDIM], vconp[NDIM], ucon[NDIM];
+  double dxdxp[NDIM][NDIM], dxpdx[NDIM][NDIM];
+  int j, k;
+  //set the 3-velocity in spherical coordinates
+  vcon[1] = vcon[2] = 0;
+  vcon[3] = omegaf;
+  //get jacobian from BL to code coordinates
+  dxdxp_func(X, dxdxp);
+  invert_matrix(dxdxp, dxpdx);
+  //convert 3-velocity to code coordinates
+  SLOOPA vconp[j] = 0;
+  SLOOP vconp[j] += dxpdx[j][k] * vcon[k];
+  //convert it to 4-velocity and put into prims
+  ut_calc_3vel(vconp, geom, &ucon[TT]);
+  SLOOPA ucon[j] = vconp[j]*ucon[TT];
+  pr[U1] = ucon[1];
+  pr[U2] = ucon[2];
+  pr[U3] = ucon[3];
+}
+
 //set density and velocity in one cell
 void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, int ri, int rj, int rk, struct of_geom *ptrgeom, struct of_geom *ptrrgeom)
 {
   double rgamma, gammamax;
   double vpar, vpar_have;
-  double X[NDIM], V[NDIM], rV[NDIM];
+  double X[NDIM], rX[NDIM], V[NDIM], rV[NDIM];
   coord(i, j, k, dirprim, X);
   bl_coord_vec(X, V);
-  coord(ri, rj, rk, CENT, X);
-  bl_coord_vec(X, rV);
+  coord(ri, rj, rk, CENT, rX);
+  bl_coord_vec(rX, rV);
   gamma_calc(rprim, ptrrgeom, &rgamma);
   compute_vpar(rprim, ptrrgeom, &vpar_have);
-  int set_bc = rprim[U1]>0; //set BCs only if flowing out
+  int set_bc = rprim[U1]>0; //force velocity to what we want only if flowing out
   if (set_bc) {
     vpar = VPARWANT;
     gammamax = GAMMAMAX;
@@ -886,7 +905,8 @@ void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, 
     vpar = vpar_have;
     gammamax = rgamma;
   }
-  set_vpar(vpar, gammamax, ptrgeom, pr);
+  set_omega_stataxi(ptrgeom, OMEGA, X, pr); //set the velocity to be purely rotational
+  set_vpar(vpar, gammamax, ptrgeom, pr); //adjust component parallel to magnetic field
   if (set_bc) {
     double bsq = bsq_calc(pr, ptrgeom);
     pr[RHO] = bsq/BSQORHOBND*pow(rV[1]/V[1],4.);

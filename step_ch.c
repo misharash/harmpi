@@ -519,7 +519,8 @@ void flux_ct(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR], double F3[]
   }
   /* adjust EMFs if needed */
 #if (WHICHPROBLEM == NSSURFACE)
-  adjust_emfs_nssurface(emf);
+  if (is_physical_bc(1, 0))
+    adjust_emfs_nssurface(emf);
 #endif
   /* rewrite EMFs as fluxes, after Toth */
 #pragma omp parallel for schedule(static,(N1+D1)*N2*N3/nthreads) collapse(3) default(none) shared(emf,F1,F2,F3,nthreads) private(i,j,k)
