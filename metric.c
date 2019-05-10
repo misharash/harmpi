@@ -128,7 +128,8 @@ double gdet_func(double gcov[][NDIM])
 /* invert gcov to get gcon */
 void gcon_func(double gcov[][NDIM], double gcon[][NDIM])
 {
-  invert_matrix( gcov, gcon );
+  if (invert_matrix( gcov, gcon ) != 0)
+    fprintf(stderr, "gcon_func(): failed to invert gcov! \n");
 }
 
 /***************************************************************************/

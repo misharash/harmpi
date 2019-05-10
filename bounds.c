@@ -777,8 +777,10 @@ void adjust_emfs_nssurface(double emf[][N1+D1][N2+D2][N3+D3])
     bl_coord(X, &r, &th2, &phi);
     emf[2][i][j][k] = -OMEGA * (cos(th2)-cos(th1)) / dx[2];
 #endif
+#if (DOE3)
     //E^3 is zero since we rotate around z-axis
     emf[3][i][j][k] = 0;
+#endif
   }
 }
 
@@ -872,7 +874,8 @@ void set_omega_stataxi(struct of_geom *geom, double omegaf, double *X, double *p
   vcon[3] = omegaf;
   //get jacobian from BL to code coordinates
   dxdxp_func(X, dxdxp);
-  invert_matrix(dxdxp, dxpdx);
+  if (invert_matrix(dxdxp, dxpdx) != 0)
+    fprintf(stderr, "set_omega_stataxi(): failed to invert dxdxp! \n");
   //convert 3-velocity to code coordinates
   SLOOPA vconp[j] = 0;
   SLOOP vconp[j] += dxpdx[j][k] * vcon[k];

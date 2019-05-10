@@ -1311,7 +1311,8 @@ void coord_transform(double *pr,int ii, int jj, int kk)
   /* dr^\mu/dx^\nu jacobian, where x^\nu are internal coords */
   dxdxp_func(X, dxdxp);
   /* dx^\mu/dr^\nu jacobian */
-  invert_matrix(dxdxp, dxpdx);
+  if (invert_matrix(dxdxp, dxpdx) != 0)
+    fprintf(stderr, "coord_transform(): failed to invert dxdxp! \n");
   
   for(i=0;i<NDIM;i++) {
     uconp[i] = 0;
