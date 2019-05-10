@@ -875,7 +875,7 @@ void set_omega_stataxi(struct of_geom *geom, double omegaf, double *X, double *p
   //get jacobian from BL to code coordinates
   dxdxp_func(X, dxdxp);
   if (invert_matrix(dxdxp, dxpdx) != 0)
-    fprintf(stderr, "set_omega_stataxi(): failed to invert dxdxp! \n");
+    fprintf(stderr, "set_omega_stataxi(): failed to invert dxdxp at coords %g %g %g! \n", X[1], X[2], X[3]);
   //convert 3-velocity to code coordinates
   SLOOPA vconp[j] = 0;
   SLOOP vconp[j] += dxpdx[j][k] * vcon[k];
