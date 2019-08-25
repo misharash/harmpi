@@ -804,7 +804,7 @@ void compute_vpar(double pr[], struct of_geom *geom, double *vpar) {
   absB = sqrt(Bsq);
   //B_mu v^mu
   Bdotv = 0;
-  SLOOPA Bdotv += Bccov[j] * ucon[j];
+  SLOOPA Bdotv += Bccov[j] * vcon[j];
   //vpar
   *vpar = Bdotv/absB;
   if (Bccon[1]<0) *vpar *= -1; //positive direction is away from the star
@@ -837,7 +837,7 @@ void set_vpar(double vpar, double gamma_max, struct of_geom *geom, double pr[]) 
   DLOOPA vcon[j] = ucon[j]/ucon[TT];
   //B_mu v^mu
   Bdotv = 0;
-  SLOOPA Bdotv += Bccov[j] * ucon[j];
+  SLOOPA Bdotv += Bccov[j] * vcon[j];
   //old velocity components
   vpar_old = Bdotv/absB;
   SLOOPA vpar_old_vec[j]  = vpar_old * Bccon[j] / absB;
