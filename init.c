@@ -948,8 +948,23 @@ void init_monopole(double Rout_val)
 	  /* rho = pow(r,-4.)/BSQORHOMAX; */
 	  /* u = pow(r,-4.*gam)/BSQOUMAX; */
 
+    #if (WHICHPROBLEM==NSSURFACE)
+    // inner vacuum
+    rho = pow(r,-4.)/BSQORHOINIT;
+	  u = pow(r,-4.)/BSQOUINIT;
+    // outer ambient density
+    #if (VACUUM_SHAPE==VACUUM_SHAPE_SPH)
+    if (r > VACUUM_RADIUS)
+    #elif (VACUUM_SHAPE==VACUUM_SHAPE_CYL)
+    if (r*sth > VACUUM_RADIUS)
+    #endif
+    {
+      rho = pow(OMEGA, 4)*DENS_FACTOR/pow(r*OMEGA, DENS_POWER);
+    }
+    #else
 	  rho = RHOMINLIMIT+(r/10./rhor)/pow(r,4)/BSQORHOMAX;
 	  u = UUMINLIMIT+(r/10./rhor)/pow(r,4)/BSQORHOMAX;
+    #endif
 
 	  /* these values are demonstrably physical
 	     for all values of a and r */

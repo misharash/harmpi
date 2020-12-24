@@ -221,8 +221,18 @@
 #if(WHICHPROBLEM == NSSURFACE)
 #define OMEGA (0.8) //neutron star surface rotation speed
 #define VPARWANT (0) //parallel velocity component set on boundary
-#define BSQORHOBND BSQORHOMAX
-#define BSQOUBND BSQORHOMAX //like in init_monopole
+#define BSQORHOINIT (BSQORHOMAX/2.)
+#define BSQOUINIT (BSQORHOINIT*5.)
+#define BSQORHOBND (BSQORHOINIT)
+#define BSQOUBND (BSQOUINIT)
+//configuration of outer ambient density profile
+#define DENS_FACTOR (4.5e3) //relation of mass to EM energy density at LC
+#define DENS_POWER (2.5) //power of outer density profile: rho ~ r^(-alpha)
+//configuration of inner vacuum region in initial conditions
+#define VACUUM_SHAPE_SPH (0)
+#define VACUUM_SHAPE_CYL (1)
+#define VACUUM_SHAPE VACUUM_SHAPE_SPH //spherical bubble
+#define VACUUM_RADIUS (4.e10)
 #endif
 
 //add mass in the drift frame (=1) instead of fluid frame (=0)
