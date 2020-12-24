@@ -317,7 +317,9 @@ void fix_flux(double F1[][N2M][N3M][NPR], double F2[][N2M][N3M][NPR], double F3[
 //#pragma omp parallel for schedule(static,MY_MAX((N2+1)*(N3+1)/nthreads,1)) collapse(2) default(none) shared(F1,nthreads) private(j,k)
         for(j=-D2;j<N2+D2;j++) {
           for(k=-D3;k<N3+D3;k++) {
+            #if (WHICHPROBLEM!=NSSURFACE) // don't zero mass flux from inner boundary for neutron star
             if(mpi_coords[1] == 0) if(F1[0 ][j][k][RHO]>0) F1[0 ][j][k][RHO]=0;
+            #endif
             if(mpi_coords[1] == mpi_dims[1]-1) if(F1[N1][j][k][RHO]<0) F1[N1][j][k][RHO]=0;
           }
         }
