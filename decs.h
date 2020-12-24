@@ -214,12 +214,12 @@
 #define POWRHO (2)
 
 #define FLOORFACTOR (1.)
-#define BSQORHOMAX (50.*FLOORFACTOR)
+#define BSQORHOMAX (100.*FLOORFACTOR)
 #define BSQOUMAX (2500.*FLOORFACTOR)
 #define UORHOMAX (50.*FLOORFACTOR)
 
 #if(WHICHPROBLEM == NSSURFACE)
-#define OMEGA (0.8) //neutron star surface rotation speed
+#define OMEGA (0.5) //neutron star surface rotation speed
 #define VPARWANT (0) //parallel velocity component set on boundary
 #define BSQORHOINIT (BSQORHOMAX/2.)
 #define BSQOUINIT (BSQORHOINIT*5.)
