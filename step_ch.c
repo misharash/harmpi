@@ -413,17 +413,17 @@ double fluxcalc(
       
       get_geometry(i,j,k,face,&geom) ;
       
-#if(WHICHPROBLEM == NSSURFACE)
-      if ((dir == 1) && (i == 0) && is_physical_bc(1,0))
-        set_hydro_nssurface(pr, p_l, p_r, i, j, k, &geom);
-#endif
-      
 #if(RESCALE)
       rescale(p_l,REVERSE,dir,i,j,k,face,&geom) ;
       rescale(p_r,REVERSE,dir,i,j,k,face,&geom) ;
 #endif
       get_state(p_l,&geom,&state_l) ;
       get_state(p_r,&geom,&state_r) ;
+      
+#if(WHICHPROBLEM == NSSURFACE)
+      if ((dir == 1) && (i == 0) && is_physical_bc(1,0))
+        set_hydro_nssurface(pr, p_l, p_r, i, j, k, &geom);
+#endif
       
       primtoflux(p_l,&state_l,dir,&geom,F_l) ;
       primtoflux(p_r,&state_r,dir,&geom,F_r) ;
