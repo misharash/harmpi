@@ -245,6 +245,18 @@ double advance(
     
     pflag[i][j][k] = Utoprim_2d(U, geom.gcov, geom.gcon, geom.g, pf[i][j][k]);
     
+    if ((i==0) && (j==0) && (k==0)) {
+      double bsq_ij = bsq_calc(pf[i][j][k], &geom);
+      printf("\nafter nstep=%d, t=%le, bsq=%le, rho=%le, ugas=%le, u=%le %le %le, B=%le %le %le\n", nstep, t, bsq_ij, pf[i][j][k][RHO], pf[i][j][k][UU], pf[i][j][k][U1], pf[i][j][k][U2], pf[i][j][k][U3], pf[i][j][k][B1], pf[i][j][k][B2], pf[i][j][k][B3]);
+      FILE *tmp_out;
+      tmp_out = fopen("prims.dat", "a");
+      fprintf(tmp_out, "%d %le ", nstep, t);
+      fprintf(tmp_out, "%le ", bsq_ij);
+      PLOOP fprintf(tmp_out, "%le ", pf[i][j][k][m]);
+      fprintf(tmp_out, "\n");
+      fclose(tmp_out);
+    }
+    
     
     if( pflag[i][j][k] ) {
       failimage[i][j][k][0]++ ;
