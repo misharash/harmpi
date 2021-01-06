@@ -159,8 +159,8 @@
 #define PERIODIC (1)          /* whether or not to use periodic boundary conditions */
 #define OUTFLOW  (0)          /* whether or not to use outflow boundary conditions in all directions */
 #elif WHICHPROBLEM == NSSURFACE
-#define N1       (128)        /* number of physical zones in X1-direction */
-#define N2       (128)        /* number of physical zones in X2-direction */
+#define N1       (256)        /* number of physical zones in X1-direction */
+#define N2       (256)        /* number of physical zones in X2-direction */
 #define N3       (1)          /* number of physical zones in X3-direction */
 #define GR       (0)          /* whether or not to use GR */
 #define BL       (1)          /* whether or not to use BL coords */
