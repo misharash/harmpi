@@ -920,6 +920,19 @@ void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, 
     pr[RHO] = rprim[RHO]*pow(rV[1]/V[1],4.);
     pr[UU]  = rprim[UU]*pow(rV[1]/V[1],4.*gam);
   }
+
+  if ((i==0) && (j==0) && (k==0)) {
+    double bsq_ij = bsq_calc(pr, ptrgeom);
+    printf("\nset_den_vel: set_bc=%d, vpar=%le\nbsq=%le, rho=%le, ugas=%le, u=%le %le %le, B=%le %le %le\n", set_bc, vpar, bsq_ij, pr[RHO], pr[UU], pr[U1], pr[U2], pr[U3], pr[B1], pr[B2], pr[B3]);
+    FILE *tmp_out;
+    tmp_out = fopen("prims_face.dat", "a");
+    fprintf(tmp_out, "%d %le ", nstep, t);
+    fprintf(tmp_out, "%le ", bsq_ij);
+    int m;
+    PLOOP fprintf(tmp_out, "%le ", pr[m]);
+    fprintf(tmp_out, "\n");
+    fclose(tmp_out);
+  }
 }
 
 //set hydrodynamic primitive variables on inner r boundary
