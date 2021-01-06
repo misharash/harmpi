@@ -889,7 +889,7 @@ void init_monopole(double Rout_val)
         rbr = Rout*10.;
   //this override is temporary, should create another init
   if (WHICHPROBLEM == NSSURFACE) {
-    R0 = 0;
+    R0 = -0.5;
     Rin = 1;
   }
     npow2=4.0; //power exponent
