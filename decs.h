@@ -220,7 +220,7 @@
 
 #if(WHICHPROBLEM == NSSURFACE)
 #define OMEGA (0.5) //neutron star surface rotation speed
-#define VPARWANT (0) //parallel velocity component set on boundary
+#define VPARWANT (0.5) //parallel velocity component set on boundary
 #define BSQORHOINIT (BSQORHOMAX/2.)
 #define BSQOUINIT (BSQORHOINIT*5.)
 #define BSQORHOBND (BSQORHOINIT)
