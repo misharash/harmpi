@@ -921,7 +921,7 @@ void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, 
     pr[UU]  = rprim[UU]*pow(rV[1]/V[1],4.);
   }
 
-  if ((i==0) && (j==0) && (k==0)) {
+  if ((i==0) && (j==N2/2) && (k==0)) {
     double bsq_ij = bsq_calc(pr, ptrgeom);
     printf("\nset_den_vel: set_bc=%d, vpar=%le\nbsq=%le, rho=%le, ugas=%le, u=%le %le %le, B=%le %le %le\n", set_bc, vpar, bsq_ij, pr[RHO], pr[UU], pr[U1], pr[U2], pr[U3], pr[B1], pr[B2], pr[B3]);
     FILE *tmp_out;
