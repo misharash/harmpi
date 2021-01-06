@@ -913,12 +913,12 @@ void set_den_vel(double pr[], double rprim[], int dirprim, int i, int j, int k, 
   set_vpar(vpar, gammamax, ptrgeom, pr); //adjust component parallel to magnetic field
   if (set_bc) {
     double bsq = bsq_calc(pr, ptrgeom);
-    pr[RHO] = bsq/BSQORHOBND*pow(rV[1]/V[1],4.);
-    pr[UU]  = bsq/BSQOUBND*pow(rV[1]/V[1],4.*gam);
+    pr[RHO] = bsq/BSQORHOBND;//*pow(rV[1]/V[1],4.);
+    pr[UU]  = bsq/BSQOUBND;//*pow(rV[1]/V[1],4.*gam);
   }
   else {
     pr[RHO] = rprim[RHO]*pow(rV[1]/V[1],4.);
-    pr[UU]  = rprim[UU]*pow(rV[1]/V[1],4.*gam);
+    pr[UU]  = rprim[UU]*pow(rV[1]/V[1],4.);
   }
 
   if ((i==0) && (j==0) && (k==0)) {
